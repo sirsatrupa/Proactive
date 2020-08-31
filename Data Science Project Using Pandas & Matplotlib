@@ -1,0 +1,77 @@
+import matplotlib.pyplot as plt; plt.rcdefaults()
+import sys
+sys.path.insert(1, './lib/python3.7/site-packages')
+import pandas as pd
+import numpy as np
+import googletrans
+import matplotlib.pyplot as plt; plt.rcdefaults()
+path="C:\\Users\\Ruali\\Desktop\\amazon.csv"
+data = pd.read_csv(path, thousands = '.') #The thousands = "." parameter makes up for the decimal formatting.
+print(data)
+data.shape
+data.head()
+data.tail()
+data.describe(include='all') # It gives a nice summary of all data
+data.isna().sum() # Check  for any missing value
+data=data.replace(0, np.nan)
+data2=data.dropna(subset=['number'])
+data2.describe(include='all')
+forest_fire_per_month = data2.groupby('month')['number'].sum()
+print(forest_fire_per_month)
+months_unique = list(data.month.unique())
+forest_fire_per_month = forest_fire_per_month.reindex(months_unique, axis=0)
+forest_fire_per_month.to_frame()
+forest_fire_per_month=forest_fire_per_month.reset_index(drop=False)
+forest_fire_per_month.head()
+forest_fire_per_month["month"].replace({'Janeiro':'January','Mar�o':'March'}, inplace=True)
+from googletrans import Translator
+translator = Translator() #create an object of Translator 
+for month in months_unique: 
+    detected = translator.detect(month)     
+    translated = translator.translate(month)     
+    print(detected)     
+    print(translated)     
+    print("...")
+translator2 = Translator() #create a new object of Translator. #cannot use the one defined before as that contains the latest #month’s calculated value
+for i, m in enumerate(forest_fire_per_month['month']):
+    translated = translator2.translate(m)  
+    month1 = translated.text    
+    forest_fire_per_month.at[i, 'month'] = month1
+print(forest_fire_per_month)
+#The plot:Let’s bar graph it.
+import matplotlib.pyplot as plt 
+import numpy as np
+plt.figure(figsize=(25, 15)) #specify width and height 
+#plt.bar(x-values, y-values) 
+plt.bar(
+forest_fire_per_month['month'],
+forest_fire_per_month['number'], 
+color = (0.5,0.1,0.5,0.6))
+#use .suptitle for the actual title and .title for the subheading
+
+plt.suptitle('Amazon Forest Fires Over the Months', fontsize=20) 
+
+plt.title('Using Data from Years 1998 - 2017', fontsize=20)  
+plt.xlabel('Month', fontsize=20) 
+plt.ylabel('Number of Forest Fires', fontsize=20)
+
+#plt.text(x-coordinate, y-coordinate, valueOfText, alignmnet)
+#this adds text at the top of each bar indicating its value
+#for i, num in enumerate(forest_fire_per_month['number']):
+for i, num in enumerate(forest_fire_per_month['number']):
+    plt.text(
+        i,
+        num + 10000,
+        num,
+        ha='center',
+        fontsize=15)
+plt.setp(plt.gca().get_xticklabels(),
+         rotation=45,
+         horizontalalignment='right',
+         fontsize=20)
+plt.setp(plt.gca().get_yticklabels(), fontsize=20)
+plt.setp(plt.gca().get_xticklabels(),
+         rotation=45,
+         horizontalalignment='right',
+         fontsize=20)
+plt.setp(plt.gca().get_yticklabels(), fontsize=20)
